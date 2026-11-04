@@ -289,45 +289,57 @@ const Fixtures = ({
 
     const renderMatches = (matches, isAssigned = false) => {
         return matches
-            .map((match) => (
-                <div
-                    key={match.match_id}
-                    className={`${styles.matchCard} ${
-                        !courtManagement && match.status === 'completed' ? styles.completed : ''
-                    } ${!courtManagement && referee ? styles.refereeMode : ''}`}
-                    onClick={() => handleMatchClick(match)}
-                >
-                    <div className={styles.matchId}>
-                        Match ID: {match.match_id}
-                    </div>
-                    <div className={styles.teams}>
-                        <div className={`${styles.team} ${
-                            match.team1_checked_in === true ? styles.checkedIn : ''
-                        }`}>
-                            <div className={styles.teamPlayers}>{match.team1_players}</div>
-                            {match.team1_id && (
-                                <div className={styles.teamId}>Team ID: {match.team1_id}</div>
-                            )}
-                            <div className={styles.score}>{match.team1Score}</div>
+            .map((match) => {
+                const isWalkover = match.match_status?.outcome_type === 'walkover' || match.outcome_type === 'walkover';
+                const winnerId = match.winner_team_id || match.match_status?.winner_team_id;
+                const isTeam1Winner = isWalkover && winnerId && winnerId === match.team1_id;
+                const isTeam2Winner = isWalkover && winnerId && winnerId === match.team2_id;
+
+                return (
+                    <div
+                        key={match.match_id}
+                        className={`${styles.matchCard} ${
+                            !courtManagement && match.status === 'completed' ? styles.completed : ''
+                        } ${!courtManagement && referee ? styles.refereeMode : ''}`}
+                        onClick={() => handleMatchClick(match)}
+                    >
+                        <div className={styles.matchId}>
+                            Match ID: {match.match_id}
+                            {isWalkover && <span className={styles.walkoverTag}>Walkover</span>}
                         </div>
-                        <div className={styles.vs}>vs</div>
-                        <div className={`${styles.team} ${
-                            match.team2_checked_in === true ? styles.checkedIn : ''
-                        }`}>
-                            <div className={styles.teamPlayers}>{match.team2_players}</div>
-                            {match.team2_id && (
-                                <div className={styles.teamId}>Team ID: {match.team2_id}</div>
-                            )}
-                            <div className={styles.score}>{match.team2Score}</div>
+                        <div className={styles.teams}>
+                            <div className={`${styles.team} ${
+                                match.team1_checked_in === true ? styles.checkedIn : ''
+                            } ${isTeam1Winner ? styles.winnerTeam : (isTeam2Winner ? styles.concededTeam : '')}`}>
+                                <div className={styles.teamPlayers}>{match.team1_players}</div>
+                                {match.team1_id && (
+                                    <div className={styles.teamId}>Team ID: {match.team1_id}</div>
+                                )}
+                                <div className={`${styles.score} ${isTeam1Winner ? styles.walkoverWinnerScore : (isTeam2Winner ? styles.walkoverLoserScore : '')}`}>
+                                    {isWalkover ? (isTeam1Winner ? 'W' : 'L') : match.team1Score}
+                                </div>
+                            </div>
+                            <div className={styles.vs}>vs</div>
+                            <div className={`${styles.team} ${
+                                match.team2_checked_in === true ? styles.checkedIn : ''
+                            } ${isTeam2Winner ? styles.winnerTeam : (isTeam1Winner ? styles.concededTeam : '')}`}>
+                                <div className={styles.teamPlayers}>{match.team2_players}</div>
+                                {match.team2_id && (
+                                    <div className={styles.teamId}>Team ID: {match.team2_id}</div>
+                                )}
+                                <div className={`${styles.score} ${isTeam2Winner ? styles.walkoverWinnerScore : (isTeam1Winner ? styles.walkoverLoserScore : '')}`}>
+                                    {isWalkover ? (isTeam2Winner ? 'W' : 'L') : match.team2Score}
+                                </div>
+                            </div>
+                        </div>
+                        <div className={styles.matchInfo}>
+                            <span className={styles.pool}>Pool: {match.pool}</span>
+                            <span className={styles.round}>{match.round_name}</span>
+                            {match.court_number && <span className={styles.courtAssigned}>Court: {match.court_number}</span>}
                         </div>
                     </div>
-                    <div className={styles.matchInfo}>
-                        <span className={styles.pool}>Pool: {match.pool}</span>
-                        <span className={styles.round}>{match.round_name}</span>
-                        {match.court_number && <span className={styles.courtAssigned}>Court: {match.court_number}</span>}
-                    </div>
-                </div>
-            ));
+                );
+            });
     };
 
     const renderGroupedMatches = (groupedMatches) => {
@@ -343,50 +355,64 @@ const Fixtures = ({
                         {courtNumber === 'unassigned' ? 'Unassigned' : `Court ${courtNumber}`}
                     </h3>
                     <div className={styles.courtMatches}>
-                        {matches.map((match) => (
-                            <div
-                                key={match.match_id}
-                                className={`${styles.matchCard} ${
-                                    !courtManagement && match.status === 'completed' ? styles.completed : ''
-                                } ${!courtManagement && referee ? styles.refereeMode : ''}`}
-                                onClick={() => handleMatchClick(match)}
-                            >
-                                <div className={styles.matchInfo}>
-                                    <div className={styles.matchId}>
-                                        Match ID: {match.match_id}
+                        {matches.map((match) => {
+                            const isWalkover = match.match_status?.outcome_type === 'walkover' || match.outcome_type === 'walkover';
+                            const winnerId = match.winner_team_id || match.match_status?.winner_team_id;
+                            const isTeam1Winner = isWalkover && winnerId && winnerId === match.team1_id;
+                            const isTeam2Winner = isWalkover && winnerId && winnerId === match.team2_id;
+
+                            return (
+                                <div
+                                    key={match.match_id}
+                                    className={`${styles.matchCard} ${
+                                        !courtManagement && match.status === 'completed' ? styles.completed : ''
+                                    } ${!courtManagement && referee ? styles.refereeMode : ''}`}
+                                    onClick={() => handleMatchClick(match)}
+                                >
+                                    <div className={styles.matchInfo}>
+                                        <div className={styles.matchId}>
+                                            Match ID: {match.match_id}
+                                            {isWalkover && <span className={styles.walkoverTag}>Walkover</span>}
+                                        </div>
+                                        {match.round_name && (
+                                            <div className={styles.roundName}>
+                                                {match.round_name}
+                                            </div>
+                                        )}
                                     </div>
-                                    {match.round_name && (
-                                        <div className={styles.roundName}>
-                                            {match.round_name}
+                                    <div className={styles.teams}>
+                                        <div className={`${styles.team} ${
+                                            match.team1_checked_in ? styles.checkedIn : ''
+                                        } ${isTeam1Winner ? styles.winnerTeam : (isTeam2Winner ? styles.concededTeam : '')}`}>
+                                            <div className={styles.teamPlayers}>{match.team1_players}</div>
+                                            {match.team1_id && (
+                                                <div className={styles.teamId}>Team ID: {match.team1_id}</div>
+                                            )}
+                                            <div className={`${styles.score} ${isTeam1Winner ? styles.walkoverWinnerScore : (isTeam2Winner ? styles.walkoverLoserScore : '')}`}>
+                                                {isWalkover ? (isTeam1Winner ? 'W' : 'L') : match.team1Score}
+                                            </div>
+                                        </div>
+                                        <div className={styles.vs}>vs</div>
+                                        <div className={`${styles.team} ${
+                                            match.team2_checked_in ? styles.checkedIn : ''
+                                        } ${isTeam2Winner ? styles.winnerTeam : (isTeam1Winner ? styles.concededTeam : '')}`}>
+                                            <div className={styles.teamPlayers}>{match.team2_players}</div>
+                                            {match.team2_id && (
+                                                <div className={styles.teamId}>Team ID: {match.team2_id}</div>
+                                            )}
+                                            <div className={`${styles.score} ${isTeam2Winner ? styles.walkoverWinnerScore : (isTeam1Winner ? styles.walkoverLoserScore : '')}`}>
+                                                {isWalkover ? (isTeam2Winner ? 'W' : 'L') : match.team2Score}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {match.status === 'completed' && (
+                                        <div className={styles.status}>
+                                            {isWalkover ? 'Completed (Walkover)' : 'Completed'}
                                         </div>
                                     )}
                                 </div>
-                                <div className={styles.teams}>
-                                    <div className={`${styles.team} ${
-                                        match.team1_checked_in ? styles.checkedIn : ''
-                                    }`}>
-                                        <div className={styles.teamPlayers}>{match.team1_players}</div>
-                                        {match.team1_id && (
-                                            <div className={styles.teamId}>Team ID: {match.team1_id}</div>
-                                        )}
-                                        <div className={styles.score}>{match.team1Score}</div>
-                                    </div>
-                                    <div className={styles.vs}>vs</div>
-                                    <div className={`${styles.team} ${
-                                        match.team2_checked_in ? styles.checkedIn : ''
-                                    }`}>
-                                        <div className={styles.teamPlayers}>{match.team2_players}</div>
-                                        {match.team2_id && (
-                                            <div className={styles.teamId}>Team ID: {match.team2_id}</div>
-                                        )}
-                                        <div className={styles.score}>{match.team2Score}</div>
-                                    </div>
-                                </div>
-                                {match.status === 'completed' && (
-                                    <div className={styles.status}>Completed</div>
-                                )}
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             ));

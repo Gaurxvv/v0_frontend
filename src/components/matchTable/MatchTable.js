@@ -46,15 +46,18 @@ const MatchTable = ({ tournamentId }) => {
       ];
 
       // Convert matches to CSV rows
-      const csvRows = matches.map(match => [
-        match.match_id,
-        match.round_name || `Round ${match.round_id}`,
-        match.pool || '-',
-        match.team1_players,
-        match.team2_players,
-        match.match_result,
-        match.match_status.status
-      ]);
+      const csvRows = matches.map(match => {
+        const isWalkover = match.match_status?.outcome_type === 'walkover';
+        return [
+          match.match_id,
+          match.round_name || `Round ${match.round_id}`,
+          match.pool || '-',
+          match.team1_players,
+          match.team2_players,
+          isWalkover ? 'W/O' : match.match_result,
+          isWalkover ? 'walkover' : match.match_status?.status
+        ];
+      });
 
       // Combine headers and rows
       const csvContent = [
@@ -103,21 +106,38 @@ const MatchTable = ({ tournamentId }) => {
             </tr>
           </thead>
           <tbody>
-            {matches.map((match) => (
-              <tr key={match.match_id}>
-                <td>{match.match_id}</td>
-                <td>{match.round_name || `Round ${match.round_id}`}</td>
-                <td>{match.pool || '-'}</td>
-                <td>{match.team1_players}</td>
-                <td>{match.team2_players}</td>
-                <td>{match.match_result}</td>
-                <td>
-                  <span className={`${stl.status} ${stl[match.match_status.status]}`}>
-                    {match.match_status.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {matches.map((match) => {
+              const isWalkover = match.match_status?.outcome_type === 'walkover';
+              return (
+                <tr key={match.match_id}>
+                  <td>{match.match_id}</td>
+                  <td>{match.round_name || `Round ${match.round_id}`}</td>
+                  <td>{match.pool || '-'}</td>
+                  <td style={isWalkover && match.match_status?.winner_team_id === match.team1?.team_id ? { fontWeight: 'bold', color: '#2e7d32' } : {}}>
+                    {match.team1_players}
+                    {isWalkover && match.match_status?.winner_team_id === match.team1?.team_id && ' (Winner)'}
+                  </td>
+                  <td style={isWalkover && match.match_status?.winner_team_id === match.team2?.team_id ? { fontWeight: 'bold', color: '#2e7d32' } : {}}>
+                    {match.team2_players}
+                    {isWalkover && match.match_status?.winner_team_id === match.team2?.team_id && ' (Winner)'}
+                  </td>
+                  <td>
+                    {isWalkover ? (
+                      <span className={stl.walkoverResult} title={match.match_status?.outcome_details || 'Walkover'}>
+                        W/O
+                      </span>
+                    ) : (
+                      match.match_result
+                    )}
+                  </td>
+                  <td>
+                    <span className={`${stl.status} ${isWalkover ? stl.walkoverStatus : stl[match.match_status?.status]}`}>
+                      {isWalkover ? 'Walkover' : match.match_status?.status}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

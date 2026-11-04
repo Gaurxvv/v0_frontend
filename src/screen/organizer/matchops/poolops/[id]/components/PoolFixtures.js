@@ -127,38 +127,53 @@ const PoolFixtures = ({ pool, tournamentId, onFixturesChange, isSingles }) => {
                     </div>
                 ) : fixtures?.matches?.length > 0 ? (
                     <div className={stl.fixturesList}>
-                        {fixtures.matches.map((match, index) => (
-                            <div key={match.match_id} className={stl.matchCard}>
-                                <div className={stl.matchHeader}>
-                                    <span className={stl.matchNumber}>Match {index + 1}</span>
-                                    <span className={`${stl.status} ${stl[match.status]}`}>
-                                        {match.status === 'completed' ? 'Completed' :
-                                         match.status === 'in_progress' ? 'In Progress' : 'Pending'}
-                                    </span>
-                                </div>
-                                <div className={stl.teams}>
-                                    <div className={`${stl.team} ${match.winner_team_id === match.team1.team_id ? stl.winner : ''}`}>
-                                        {!isSingles && <div className={stl.teamName}>{match.team1.name}</div>}
-                                        <div className={stl.players}>
-                                            {isSingles ? match.team1.players[0] : match.team1.players.join(' & ')}
+                        {fixtures.matches.map((match, index) => {
+                            const isWalkover = match.outcome_type === 'walkover';
+                            return (
+                                <div key={match.match_id} className={stl.matchCard}>
+                                    <div className={stl.matchHeader}>
+                                        <div>
+                                            <span className={stl.matchNumber}>Match {index + 1}</span>
+                                            {isWalkover && <span className={stl.walkoverTag}>Walkover</span>}
                                         </div>
-                                        {match.scores && (
-                                            <div className={stl.score}>{match.scores.team1_score}</div>
-                                        )}
+                                        <span className={`${stl.status} ${stl[match.status]}`}>
+                                            {isWalkover ? 'Completed (Walkover)' :
+                                             match.status === 'completed' ? 'Completed' :
+                                             match.status === 'in_progress' ? 'In Progress' : 'Pending'}
+                                        </span>
                                     </div>
-                                    <div className={stl.vs}>vs</div>
-                                    <div className={`${stl.team} ${match.winner_team_id === match.team2.team_id ? stl.winner : ''}`}>
-                                        {!isSingles && <div className={stl.teamName}>{match.team2.name}</div>}
-                                        <div className={stl.players}>
-                                            {isSingles ? match.team2.players[0] : match.team2.players.join(' & ')}
+                                    <div className={stl.teams}>
+                                        <div className={`${stl.team} ${match.winner_team_id === match.team1.team_id ? stl.winner : ''}`}>
+                                            {!isSingles && <div className={stl.teamName}>{match.team1.name}</div>}
+                                            <div className={stl.players}>
+                                                {isSingles ? match.team1.players[0] : match.team1.players.join(' & ')}
+                                            </div>
+                                            {isWalkover ? (
+                                                <div className={stl.score} style={match.winner_team_id === match.team1.team_id ? { color: '#2e7d32', fontWeight: 'bold' } : { color: '#9e9e9e' }}>
+                                                    {match.winner_team_id === match.team1.team_id ? 'W' : 'L'}
+                                                </div>
+                                            ) : match.scores && (
+                                                <div className={stl.score}>{match.scores.team1_score}</div>
+                                            )}
                                         </div>
-                                        {match.scores && (
-                                            <div className={stl.score}>{match.scores.team2_score}</div>
-                                        )}
+                                        <div className={stl.vs}>vs</div>
+                                        <div className={`${stl.team} ${match.winner_team_id === match.team2.team_id ? stl.winner : ''}`}>
+                                            {!isSingles && <div className={stl.teamName}>{match.team2.name}</div>}
+                                            <div className={stl.players}>
+                                                {isSingles ? match.team2.players[0] : match.team2.players.join(' & ')}
+                                            </div>
+                                            {isWalkover ? (
+                                                <div className={stl.score} style={match.winner_team_id === match.team2.team_id ? { color: '#2e7d32', fontWeight: 'bold' } : { color: '#9e9e9e' }}>
+                                                    {match.winner_team_id === match.team2.team_id ? 'W' : 'L'}
+                                                </div>
+                                            ) : match.scores && (
+                                                <div className={stl.score}>{match.scores.team2_score}</div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className={stl.noFixtures}>

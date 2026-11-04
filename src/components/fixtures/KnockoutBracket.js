@@ -84,14 +84,18 @@ const KnockoutBracket = ({ matches }) => {
                 participants: [
                     {
                         id: match.team1?.team_id || 'TBD',
-                        resultText: match.match_result.split('-')[0] || null,
+                        resultText: match.match_status?.outcome_type === 'walkover'
+                            ? (match.match_status?.winner_team_id === match.team1?.team_id ? 'W (W/O)' : 'L')
+                            : (match.match_result?.split('-')[0] || null),
                         isWinner: match.match_status?.winner_team_id === match.team1?.team_id,
                         status: match.team1?.checked_in ? 'PLAYED' : null,
                         name: formatPlayerNames(match.team1_players)
                     },
                     {
                         id: match.team2?.team_id || 'TBD',
-                        resultText: match.match_result.split('-')[1] || null,
+                        resultText: match.match_status?.outcome_type === 'walkover'
+                            ? (match.match_status?.winner_team_id === match.team2?.team_id ? 'W (W/O)' : 'L')
+                            : (match.match_result?.split('-')[1] || null),
                         isWinner: match.match_status?.winner_team_id === match.team2?.team_id,
                         status: match.team2?.checked_in ? 'PLAYED' : null,
                         name: formatPlayerNames(match.team2_players)

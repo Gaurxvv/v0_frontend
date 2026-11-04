@@ -110,3 +110,20 @@
     }
   }
 } 
+
+.walkoverStatus {
+  background-color: #ffe0b2;
+  color: #e65100;
+  font-weight: 600;
+}
+
+.walkoverResult {
+  display: inline-block;
+  background-color: #fff3e0;
+  color: #e65100;
+  border: 1px solid #ffb74d;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
